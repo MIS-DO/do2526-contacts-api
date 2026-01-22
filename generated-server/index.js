@@ -19,35 +19,32 @@ const config = {
 
 // Initialize database before running the app
 var db = require('./db');
-db.connect(function (err, _db) {
-  console.info('Initializing DB...');
-  if(err) {
+
+async function start() {
+  try {
+    await db.connect();
+    console.info('Initializing DB...');
+    const contacts = await db.find({});
+    if (contacts.length === 0) {
+      console.info('Empty DB, loading initial data...');
+      await db.init();
+    } else {
+      console.info('DB already has ' + contacts.length + ' contacts.');
+    }
+  } catch (err) {
     console.error('Error connecting to DB!', err);
-    return 1;
-  } else {
-    db.find({}, function (err, contacts) {
-      if(err) {
-        console.error('Error while getting initial data from DB!', err);
-      } else {
-        if (contacts.length === 0) {
-          console.info('Empty DB, loading initial data...');
-          db.init();
-      } else {
-          console.info('DB already has ' + contacts.length + ' contacts.');
-      }
-      }
-    });
+    process.exit(1);
   }
-});
 
-
-initialize(app, config).then(() => {
-    http.createServer(app).listen(serverPort, () => {
+  await initialize(app, config);
+  http.createServer(app).listen(serverPort, () => {
     console.log("\nApp running at http://localhost:" + serverPort);
     console.log("________________________________________________________________");
     if (!config?.middleware?.swagger?.disable) {
-        console.log('API docs (Swagger UI) available on http://localhost:' + serverPort + '/docs');
-        console.log("________________________________________________________________");
+      console.log('API docs (Swagger UI) available on http://localhost:' + serverPort + '/docs');
+      console.log("________________________________________________________________");
     }
-    });
-});
+  });
+}
+
+start();
