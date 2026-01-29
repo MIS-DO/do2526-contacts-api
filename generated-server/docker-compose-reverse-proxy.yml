@@ -1,0 +1,43 @@
+services:
+  contacts-dev:
+    build: .
+    depends_on:
+      mongo-dev:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=development
+      - VIRTUAL_HOST=dev.dos-contacts.es
+      - MONGODB_HOST=mongo-dev
+  mongo-dev:
+    image: mongo
+    volumes:
+      - "./data:/data/db"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  contacts-prod:
+    build: .
+    depends_on:
+      mongo-prod:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - VIRTUAL_HOST=dos-contacts.es
+      - MONGODB_HOST=mongo-prod
+  mongo-prod:
+    image: mongo
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+networks:
+  default:
+    external:
+      name: service-tier
+
+  

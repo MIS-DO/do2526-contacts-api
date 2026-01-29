@@ -5,7 +5,8 @@ const assert = require('assert');
 const logger = require('./logger');
 
 // Connection URL
-const url = 'mongodb://mongo:27017';
+const mongoHost = process.env.MONGODB_HOST || 'mongo';
+const url = 'mongodb://' + mongoHost + ':27017';
 
 // Database Name
 const dbName = 'contacts';
