@@ -2,6 +2,7 @@
 
 const { MongoClient } = require('mongodb');
 const assert = require('assert');
+const logger = require('./logger');
 
 // Connection URL
 const url = 'mongodb://mongo:27017';
@@ -17,7 +18,7 @@ let _collection;
 // Creates the connection to the database
 module.exports.connect = async function connect() {
     if (_collection) {
-        console.warn('Trying to create the DB connection again!');
+        logger.warn('Trying to create the DB connection again!');
         return _collection;
     }
     try {
@@ -25,8 +26,8 @@ module.exports.connect = async function connect() {
         _collection = client.db(dbName).collection(dbName);
         return _collection;
     } catch (err) {
-        console.error('Error connecting to DB!', err);
-        process.exit(1);
+        logger.error('Error connecting to DB!', err);
+        setTimeout(function () {process.exit(1)}, 1000);
     }
 };
 

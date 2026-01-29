@@ -1,7 +1,7 @@
 const http = require('http');
 const express = require("express");
 const { initialize } = require('@oas-tools/core');
-
+const logger = require('./logger');
 
 const serverPort = 8080;
 const app = express();
@@ -23,26 +23,26 @@ var db = require('./db');
 async function start() {
   try {
     await db.connect();
-    console.info('Initializing DB...');
+    logger.info('Initializing DB...');
     const contacts = await db.find({});
     if (contacts.length === 0) {
-      console.info('Empty DB, loading initial data...');
+      logger.info('Empty DB, loading initial data...');
       await db.init();
     } else {
-      console.info('DB already has ' + contacts.length + ' contacts.');
+      logger.info('DB already has ' + contacts.length + ' contacts.');
     }
   } catch (err) {
-    console.error('Error connecting to DB!', err);
-    process.exit(1);
+    logger.error('Error connecting to DB!', err);
+    setTimeout(function () {process.exit(1)}, 1000);
   }
 
   await initialize(app, config);
   http.createServer(app).listen(serverPort, () => {
-    console.log("\nApp running at http://localhost:" + serverPort);
-    console.log("________________________________________________________________");
+    logger.info("\nApp running at http://localhost:" + serverPort);
+    logger.info("________________________________________________________________");
     if (!config?.middleware?.swagger?.disable) {
-      console.log('API docs (Swagger UI) available on http://localhost:' + serverPort + '/docs');
-      console.log("________________________________________________________________");
+      logger.info('API docs (Swagger UI) available on http://localhost:' + serverPort + '/docs');
+      logger.info("________________________________________________________________");
     }
   });
 }
